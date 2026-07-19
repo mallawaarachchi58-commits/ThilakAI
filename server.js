@@ -1,7 +1,12 @@
 const http = require("http");
 const fs = require("fs");
+const OpenAI = require("openai");
 
-const server = http.createServer((req, res) => {
+const client = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY
+});
+
+const server = http.createServer(async (req, res) => {
 
   if (req.url === "/" && req.method === "GET") {
 
@@ -13,40 +18,42 @@ const server = http.createServer((req, res) => {
     });
 
   } else if (req.url === "/chat" && req.method === "POST") {
-
     let body = "";
 
     req.on("data", chunk => {
       body += chunk;
     });
 
-    req.on("end", () => {
+    req.on("end", async () => {
 
-      let message = JSON.parse(body).message;
-      let text = message.toLowerCase();
+      try {
 
-      let reply;
+        const message = JSON.parse(body).message;
 
-      if (text.includes("hi") || text.includes("hello")) {
-        reply = "Hello! How can I help you?";
+        const response = await client.responses.create({
+          model: "gpt-4.1-mini",
+          input: message
+        });
+
+        res.writeHead(200, {
+          "Content-Type": "application/json"
+        });
+
+        res.end(JSON.stringify({
+          reply: response.output_text
+        }));
+
+      } catch (error) {
+
+        res.writeHead(500, {
+          "Content-Type": "application/json"
+        });
+
+        res.end(JSON.stringify({
+          reply: "Error connecting to AI"
+        }));
+
       }
-      else if (text.includes("who are you") || message.includes("ඔයා කවුද")) {
-        reply = "මම Thilak AI Assistant.";
-      }
-      else if (text.includes("how are you") || message.includes("කොහොමද")) {
-        reply = "I am fine. Thank you!";
-      }
-      else {
-        reply = "I received: " + message;
-      }
-
-      res.writeHead(200, {
-        "Content-Type": "application/json"
-      });
-
-      res.end(JSON.stringify({
-        reply: reply
-      }));
 
     });
 
@@ -63,3 +70,4 @@ const server = http.createServer((req, res) => {
 server.listen(3000, () => {
   console.log("Thilak AI running on port 3000");
 });
+
