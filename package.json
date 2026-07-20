@@ -1,4 +1,10 @@
 {
+  "name": "thilak-ai",
+  "version": "1.0.0",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
   "dependencies": {
     "openai": "^6.48.0"
   }

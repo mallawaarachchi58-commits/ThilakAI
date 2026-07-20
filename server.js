@@ -17,7 +17,8 @@ const server = http.createServer(async (req, res) => {
       res.end(data);
     });
 
-  } else if (req.url === "/chat" && req.method === "POST") {
+  }  else if (req.url === "/chat" && req.method === "POST") {
+
     let body = "";
 
     req.on("data", chunk => {
@@ -45,12 +46,14 @@ const server = http.createServer(async (req, res) => {
 
       } catch (error) {
 
+        console.error(error);
+
         res.writeHead(500, {
           "Content-Type": "application/json"
         });
 
         res.end(JSON.stringify({
-          reply: "Error connecting to AI"
+          reply: "Server Error"
         }));
 
       }
@@ -65,7 +68,6 @@ const server = http.createServer(async (req, res) => {
   }
 
 });
-
 
 server.listen(3000, () => {
   console.log("Thilak AI running on port 3000");
